@@ -27,23 +27,58 @@ Sensor ini dipilih atas dasar pertimbangan **cost-effectiveness**: harganya jauh
 - Sistem alarm berfungsi sesuai rancangan saat mendeteksi suhu di atas normal
 
 ## Analisis Sumber Error
-Ditemukan pola bias yang **sistematis, bukan acak** — mengindikasikan kombinasi dua faktor:
 
-1. **Response time & kontak termal sensor** — probe DS18B20 memiliki lapisan pelindung waterproof yang tidak dioptimalkan untuk kontak kulit, menyebabkan waktu penyesuaian suhu yang sedikit lebih lambat dibanding termometer digital referensi.
-2. **Kondisi lingkungan pengukuran** — eksperimen dilakukan di ruangan ber-AC tanpa penyekat udara di sekitar sensor. Ini didukung temuan riset (Kalashnikov & Elyounsi, 2021) yang menunjukkan pergerakan udara yang tidak dibatasi dapat menyebabkan perbedaan pembacaan signifikan antar sensor suhu digital, bahkan yang ditempatkan berdekatan sekalipun.
+Analisis kuantitatif lengkap tersedia di [`analysis/sensor_calibration_analysis.ipynb`](analysis/sensor_calibration_analysis.ipynb). Ringkasan temuan utama:
 
-Studi yang sama menemukan bahwa setelah faktor pergerakan udara dan perbedaan response time dieliminasi, DS18B20 menunjukkan kesesuaian sangat baik dengan sensor RTD presisi tinggi (Pt100) — mendukung kesimpulan bahwa DS18B20 **akurat secara potensi**, namun performanya sensitif terhadap kondisi pengukuran.
+**1. Korelasi sensor vs termometer digital sangat kuat**
+Regresi linear di ketiga lokasi menghasilkan **R² = 0.9995–0.9997**, menandakan sensor DS18B20 secara konsisten "mengikuti" nilai referensi dengan sangat baik — bukan pembacaan acak, melainkan bergeser dengan pola yang bisa diprediksi (slope ≈ 0.99–1.00 di semua lokasi).
+
+**2. Bias konsisten satu arah (bukan random)**
+
+| Lokasi | Rata-rata selisih (°C) | Std. deviasi | Rata-rata error (%) |
+|---|---|---|---|
+| Sela-sela lengan | 0.0647 | 0.0146 | 0.1747% |
+| Lipatan ketiak | 0.0633 | 0.0180 | 0.1747% |
+| Genggaman tangan | 0.0267 | 0.0105 | 0.0760% |
+
+Standar deviasi yang kecil di setiap lokasi menunjukkan bias-nya stabil, bukan fluktuasi acak — pola ini sejalan dengan penyebab **sistematis**: kombinasi *response time* sensor dan kontak termal probe yang kurang optimal ke kulit (lapisan pelindung waterproof menambah hambatan konduksi panas), diperkuat oleh kondisi ruangan ber-AC tanpa penyekat udara di sekitar sensor saat eksperimen — faktor yang juga didukung literatur (Kalashnikov & Elyounsi, 2021) sebagai penyebab signifikan diskrepansi pembacaan sensor suhu digital.
+
+**3. Koreksi offset berhasil menurunkan error signifikan**
+
+| Lokasi | Offset diterapkan (°C) | Error sebelum | Error sesudah | Penurunan |
+|---|---|---|---|---|
+| Sela-sela lengan | +0.0647 | 0.1747% | 0.0309% | **−82%** |
+| Lipatan ketiak | +0.0633 | 0.1747% | 0.0422% | **−76%** |
+| Genggaman tangan | +0.0267 | 0.0760% | 0.0463% | **−39%** |
+
+Setelah diterapkan koreksi offset konstan (rata-rata selisih per lokasi), error turun drastis di semua titik pengukuran — **membuktikan secara kuantitatif** bahwa sumber error memang sistematis dan dapat dikoreksi, bukan murni acak akibat lingkungan.
 
 ## Kesimpulan
-Meski memiliki toleransi akurasi pabrik ±0.5°C, DS18B20 menunjukkan performa aktual yang jauh lebih presisi (error <0.3%) untuk aplikasi pengukuran suhu tubuh non-kritis. Trade-off biaya vs akurasi terbukti sepadan untuk kebutuhan prototipe/edukasi, dengan catatan kondisi pengukuran (isolasi dari aliran udara, waktu stabilisasi cukup) perlu diperhatikan untuk hasil optimal.
+Meski memiliki toleransi akurasi pabrik ±0.5°C, DS18B20 menunjukkan performa aktual yang jauh lebih presisi (error awal <0.3%, turun hingga <0.05% setelah kalibrasi offset sederhana) untuk aplikasi pengukuran suhu tubuh non-kritis. Trade-off biaya vs akurasi terbukti sepadan untuk kebutuhan prototipe/edukasi — dengan kalibrasi offset sederhana, sensor low-cost ini dapat mencapai akurasi yang mendekati termometer digital, asalkan kondisi pengukuran (isolasi dari aliran udara, waktu stabilisasi cukup) diperhatikan.
 
 ## Skill yang Didemonstrasikan
 - Akuisisi data sensor & komunikasi protokol 1-Wire
 - Validasi instrumen terhadap alat ukur standar (metrologi dasar)
-- Analisis statistik: regresi linear, perhitungan error & persentase penyimpangan
+- Analisis statistik: regresi linear (Python/scipy), perhitungan error & persentase penyimpangan
+- Kalibrasi instrumen: koreksi offset dan evaluasi hasil kuantitatif
 - Root cause analysis (membedakan error sistematis vs random)
-- Perancangan sistem alarm berbasis ambang batas (threshold-based control)
+- Perancangan sistem alarm berbasis ambang batas (threshold-based control) di Arduino/C
 - Trade-off engineering: mempertimbangkan cost vs performa dalam pemilihan komponen
+
+## Struktur Repository
+```
+├── README.md
+├── arduino_code/
+│   └── ds18b20_temp_alarm.ino
+├── data/
+│   ├── raw_temperature_measurements.csv
+│   └── sensor_precision_test.csv
+├── analysis/
+│   └── sensor_calibration_analysis.ipynb
+└── images/
+    ├── regresi_per_lokasi.png
+    └── before_after_koreksi.png
+```
 
 ## Referensi
 - Aritonang, W., et al. (2021). *Implementasi Sensor Suhu DS18B20 dan Sensor Tekanan MPX5700AP*. Jurnal Ilmiah Wahana Pendidikan.
