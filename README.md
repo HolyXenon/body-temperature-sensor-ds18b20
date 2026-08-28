@@ -26,6 +26,9 @@ Sensor ini dipilih atas dasar pertimbangan **cost-effectiveness**: harganya jauh
 - Bias pembacaan konsisten satu arah (sensor selalu sedikit lebih rendah dari termometer digital) di seluruh titik pengukuran
 - Sistem alarm berfungsi sesuai rancangan saat mendeteksi suhu di atas normal
 
+![Regresi Sensor vs Termometer Digital per Lokasi](images/regresi_per_lokasi.png)
+*Korelasi sangat kuat (R² = 0.9995–0.9997) antara pembacaan sensor dan termometer digital referensi di ketiga lokasi pengukuran.*
+
 ## Analisis Sumber Error
 
 Analisis kuantitatif lengkap tersedia di [`analysis/sensor_calibration_analysis.ipynb`](analysis/sensor_calibration_analysis.ipynb). Ringkasan temuan utama:
@@ -52,6 +55,9 @@ Standar deviasi yang kecil di setiap lokasi menunjukkan bias-nya stabil, bukan f
 | Genggaman tangan | +0.0267 | 0.0760% | 0.0463% | **−39%** |
 
 Setelah diterapkan koreksi offset konstan (rata-rata selisih per lokasi), error turun drastis di semua titik pengukuran — **membuktikan secara kuantitatif** bahwa sumber error memang sistematis dan dapat dikoreksi, bukan murni acak akibat lingkungan.
+
+![Perbandingan Error Sebelum vs Sesudah Koreksi Offset](images/before_after_koreksi.png)
+*Penurunan error 39%–82% setelah koreksi offset diterapkan di ketiga lokasi.*
 
 ## Kesimpulan
 Meski memiliki toleransi akurasi pabrik ±0.5°C, DS18B20 menunjukkan performa aktual yang jauh lebih presisi (error awal <0.3%, turun hingga <0.05% setelah kalibrasi offset sederhana) untuk aplikasi pengukuran suhu tubuh non-kritis. Trade-off biaya vs akurasi terbukti sepadan untuk kebutuhan prototipe/edukasi — dengan kalibrasi offset sederhana, sensor low-cost ini dapat mencapai akurasi yang mendekati termometer digital, asalkan kondisi pengukuran (isolasi dari aliran udara, waktu stabilisasi cukup) diperhatikan.
