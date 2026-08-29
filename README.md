@@ -71,6 +71,9 @@ Meski memiliki toleransi akurasi pabrik ±0.5°C, DS18B20 menunjukkan performa a
 - Perancangan sistem alarm berbasis ambang batas (threshold-based control) di Arduino/C
 - Trade-off engineering: mempertimbangkan cost vs performa dalam pemilihan komponen
 
+## Dokumentasi Lengkap
+📄 Dokumentasi teknis lengkap (teori dasar, rumus, tabel data mentah, diagram rangkaian) tersedia di [`docs/laporan_teknis_ds18b20.pdf`](docs/laporan_teknis_ds18b20.pdf)
+
 ## Struktur Repository
 ```
 ├── README.md
@@ -81,9 +84,11 @@ Meski memiliki toleransi akurasi pabrik ±0.5°C, DS18B20 menunjukkan performa a
 │   └── sensor_precision_test.csv
 ├── analysis/
 │   └── sensor_calibration_analysis.ipynb
-└── images/
-    ├── regresi_per_lokasi.png
-    └── before_after_koreksi.png
+├── images/
+│   ├── regresi_per_lokasi.png
+│   └── before_after_koreksi.png
+└── docs/
+    └── laporan_teknis_ds18b20.pdf
 ```
 
 ## Referensi
